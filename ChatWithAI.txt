@@ -1,0 +1,42 @@
+# Otaku E-Commerce Project Progress Summary
+Last Updated: 2026-04-11 17:19 (WIB)
+
+## Status Terakhir
+Proyek saat ini stabil di penyelesaian **Tahap 4**. Fitur Custom Outfit Studio telah diperhalus dengan fitur multi-view (Depan/Belakang) dan model Lengan Panjang. Fokus selanjutnya adalah **Tahap 5 (3D Figure)**.
+
+## Ringkasan Fitur yang Selesai:
+
+### 1. Navigasi & Tampilan Utama (Tahap 1)
+- Tema visual: "Midnight Neon Elegance" (Obsidian, Neon Cyan/Magenta accents).
+- Katalog Produk: Menampilkan 9 item per halaman (Grid 3x3).
+- Filter Kategori: Tab dynamically (All, Manga, Apparel, Figures).
+- Menu Navigasi: Catalog, Custom Outfit, 3D Figure, Account, Cart.
+
+### 2. Akun & Autentikasi (Tahap 2)
+- Halaman Account: Panel Login & Register fungsional.
+- Tampilan Profil: Menampilkan avatar, greeting, email, dan role.
+- Tombol Logout: Berfungsi mengembalikan user ke state guest.
+
+### 3. Keranjang & Alur Checkout (Tahap 3)
+- Halaman Cart: Daftar item, update qty, hapus item, dan total belanja.
+- Alur Checkout: Redirect login -> redirect back to cart -> success alert.
+
+### 4. Custom Outfit Studio (Tahap 4 - REFINED)
+- **Multi-View**: Toggle Front/Back untuk semua jenis pakaian.
+- **Varian Produk**: T-Shirt, Hoodie, Polo, Jacket, dan **Long Sleeve** (Lengan Panjang).
+- **Material Color**: Pilihan Hitam/Putih dengan background canvas yang otomatis kontras.
+- **Logo Editor**: Upload (.png/.jpg), Drag-and-drop (Chest-center by default), dan Scaling (20%-200%).
+- **Fix Bug**: Perbaikan error "Not Responding" pada file picker.
+
+## Detail Teknis:
+- Backend: Spring Boot 3.2.4 (Port **8321**)
+- Frontend: React Vite (Port 5173) -> Proxy API ke 8321.
+- Database: SQL Server (Table: Users, Products, Orders, CustomOrders).
+- Data Dummy: 1000 data (500 User, 500 Product) via Flyway V3.
+
+## Langkah Selanjutnya:
+- **Tahap 5**: Implementasi 3D Costume Action Figure rendering.
+- **Tahap 6**: Integrasi API Backend secara menyeluruh.
+
+---
+*File ini diperbarui untuk mencatat milestone migrasi port dan pembaruan fitur Studio.*

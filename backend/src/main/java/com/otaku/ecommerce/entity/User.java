@@ -1,0 +1,45 @@
+package com.otaku.ecommerce.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "Users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "UserID")
+    private Integer id;
+
+    @Column(name = "Name", nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "Email", nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(name = "PasswordHash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Column(name = "Role", length = 20)
+    private String role = "Customer";
+
+    @Column(name = "CreatedAt")
+    private LocalDateTime createdAt;
+
+    // Getters and Setters omitted for brevity but standard in practice.
+    // In a real project we would use Lombok @Data or generate them.
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+}
