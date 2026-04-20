@@ -1,17 +1,33 @@
+# ─── Server ──────────────────────────────────────────────────────────────────
 server:
-  port: 8321
+  port: ${SERVER_PORT:8321}
+  shutdown: graceful
 
+# ─── Spring ──────────────────────────────────────────────────────────────────
 spring:
   application:
     name: ecommerce-backend
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  # ─── Datasource ────────────────────────────────────────────────────────────
   datasource:
-    # Ubah kredensial sesuai dengan instance SQL Server sesungguhnya
     url: jdbc:sqlserver://localhost:1433;databaseName=OtakuECommerce;encrypt=true;trustServerCertificate=true
-    username: sa
-    password: password
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:password}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  # ─── JPA / Hibernate ───────────────────────────────────────────────────────
   jpa:
     hibernate:
+      # AMAN: "validate" hanya cek skema — tidak DROP/CREATE tabel
       ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
@@ -20,14 +36,46 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.SQLServerDialect
+
+  # ─── Flyway ────────────────────────────────────────────────────────────────
   flyway:
     enabled: true
+    locations: classpath:db/migration
     baseline-on-migrate: true
+    baseline-version: 0
+    out-of-order: false
+    validate-on-migrate: true
+
+  # ─── Redis — Token Blacklist ────────────────────────────────────────────────
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000ms
+      connect-timeout: 3000ms
+
+  # ─── Multipart Upload ──────────────────────────────────────────────────────
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
 
+# ─── JWT Configuration ───────────────────────────────────────────────────────
+jwt:
+  secret: ${JWT_SECRET:OtakuEcommerceBlueprintSecretKey2026ChangeThisInProduction!!}
+  access-token-expiration: 900000      # 15 menit
+  refresh-token-expiration: 604800000  # 7 hari
+
+# ─── Cloudinary ──────────────────────────────────────────────────────────────
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:your-cloud-name}
+  api-key: ${CLOUDINARY_API_KEY:your-api-key}
+  api-secret: ${CLOUDINARY_API_SECRET:your-api-secret}
+  outfit-folder: otaku-ecommerce/outfit-references
+  figure-folder: otaku-ecommerce/figure-references
+
+# ─── Actuator ────────────────────────────────────────────────────────────────
 management:
   endpoints:
     web:

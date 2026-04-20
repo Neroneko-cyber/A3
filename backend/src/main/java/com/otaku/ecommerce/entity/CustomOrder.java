@@ -26,8 +26,13 @@ public class CustomOrder {
     @Column(name = "ConfigurationJSON")
     private String configurationJson;
 
-    @Column(name = "Price", nullable = false, precision = 18, scale = 2)
+    // Harga NULL sampai Admin menetapkan via PATCH /admin/custom-orders/{id}/price
+    @Column(name = "Price", precision = 18, scale = 2)
     private BigDecimal price;
+
+    // Status workflow: Pending Review → Quoted → Ordered → In Production → Completed
+    @Column(name = "Status", length = 50)
+    private String status = "Pending Review";
 
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -44,6 +49,8 @@ public class CustomOrder {
     public void setConfigurationJson(String configurationJson) { this.configurationJson = configurationJson; }
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

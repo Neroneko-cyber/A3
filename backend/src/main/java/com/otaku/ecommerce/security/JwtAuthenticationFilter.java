@@ -1,0 +1,78 @@
+package com.otaku.ecommerce.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.Collections;
+
+/**
+ * JwtAuthenticationFilter — Validasi JWT dengan tiga lapis:
+ * 1. Signature & expiration (JJWT)
+ * 2. Blacklist check (Redis — token sudah di-logout?)
+ * 3. Force-logout check (Redis — user di-force-logout oleh Admin?)
+ */
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+
+    @SuppressWarnings("null")
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        final String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final String jwt = authHeader.substring(7);
+
+        // Layer 1: Validasi signature & expiration
+        if (!jwtUtil.validateToken(jwt)) {
+            log.warn("[JWT-INVALID] Token tidak valid dari IP={}", request.getRemoteAddr());
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Layer 2: Cek token blacklist (sudah di-logout?)
+        if (tokenBlacklistService.isBlacklisted(jwt)) {
+            log.warn("[JWT-BLACKLISTED] Token sudah di-revoke dari IP={}", request.getRemoteAddr());
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String email = jwtUtil.extractEmail(jwt);
+        String role  = jwtUtil.extractRole(jwt);
+
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(email, null, Collections.singletonList(authority));
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}

@@ -2,6 +2,7 @@ package com.otaku.ecommerce.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "Users")
@@ -18,6 +19,7 @@ public class User {
     @Column(name = "Email", nullable = false, unique = true, length = 100)
     private String email;
 
+    @JsonIgnore
     @Column(name = "PasswordHash", nullable = false, length = 255)
     private String passwordHash;
 

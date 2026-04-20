@@ -6,18 +6,23 @@
 -- Menggunakan loop WHILE karena SQL Server mendukung procedural DML
 
 DECLARE @i INT = 1;
+DECLARE @email NVARCHAR(100);
 WHILE @i <= 500
 BEGIN
-    INSERT INTO Users (Name, Email, PasswordHash, Role)
-    VALUES (
-        CONCAT('User_', @i),
-        CONCAT('user', @i, '@otakustore.com'),
-        CONCAT('hashed_pwd_', @i),
-        CASE 
-            WHEN @i % 50 = 0 THEN 'Admin'
-            ELSE 'Customer'
-        END
-    );
+    SET @email = CONCAT('user', @i, '@otakustore.com');
+    IF NOT EXISTS (SELECT 1 FROM Users WHERE Email = @email)
+    BEGIN
+        INSERT INTO Users (Name, Email, PasswordHash, Role)
+        VALUES (
+            CONCAT('User_', @i),
+            @email,
+            CONCAT('hashed_pwd_', @i),
+            CASE 
+                WHEN @i % 50 = 0 THEN 'Admin'
+                ELSE 'Customer'
+            END
+        );
+    END
     SET @i = @i + 1;
 END;
 
@@ -28,6 +33,7 @@ WHILE @j <= 500
 BEGIN
     DECLARE @cat NVARCHAR(50);
     DECLARE @prefix NVARCHAR(100);
+    DECLARE @prodName NVARCHAR(255);
     DECLARE @basePrice DECIMAL(18,2);
 
     -- Rotasi 4 kategori
@@ -45,6 +51,8 @@ BEGIN
         WHEN 'Outfit' THEN 'Streetwear Apparel'
     END;
 
+    SET @prodName = CONCAT(@prefix, ' #', @j);
+
     SET @basePrice = CASE @cat
         WHEN 'ActionFigure' THEN 2000000 + (@j * 1500)
         WHEN 'Manga'        THEN 45000   + (@j * 200)
@@ -52,14 +60,17 @@ BEGIN
         WHEN 'Outfit'       THEN 250000  + (@j * 600)
     END;
 
-    INSERT INTO Products (Category, Name, Description, Price, StockQuantity)
-    VALUES (
-        @cat,
-        CONCAT(@prefix, ' #', @j),
-        CONCAT('Premium authentic Japanese merchandise — ', @cat, ' item number ', @j, '. Limited stock, imported directly.'),
-        @basePrice,
-        ABS(CHECKSUM(NEWID())) % 200 + 1
-    );
+    IF NOT EXISTS (SELECT 1 FROM Products WHERE Name = @prodName)
+    BEGIN
+        INSERT INTO Products (Category, Name, Description, Price, StockQuantity)
+        VALUES (
+            @cat,
+            @prodName,
+            CONCAT('Premium authentic Japanese merchandise — ', @cat, ' item number ', @j, '. Limited stock, imported directly.'),
+            @basePrice,
+            ABS(CHECKSUM(NEWID())) % 200 + 1
+        );
+    END
 
     SET @j = @j + 1;
 END;
